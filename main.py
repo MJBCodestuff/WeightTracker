@@ -108,11 +108,11 @@ def display(choice="d"):
             print(ERRORMSG2)
 
 
-def main(args):
+def main():
     # if argument is missing set to trash
-    if len(args) < 2:
-        args.append("x")
-    choice = args[1]
+    if len(sys.argv) < 2:
+        sys.argv.append("x")
+    choice = sys.argv[1]
     # set working directory to main.py path
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     # check for data file, create if not found
@@ -133,4 +133,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
