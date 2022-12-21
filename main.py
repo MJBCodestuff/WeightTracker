@@ -1,7 +1,6 @@
 import os
 import re
 import sys
-import traceback
 import datetime
 from datetime import date
 import plotly.graph_objects as go
@@ -11,6 +10,7 @@ ERRORMSG1 = "Add (a)dd, (d)aily or (w)eekly as argument"
 ERRORMSG2 = "No data available"
 ERRORMSG3 = "Entry already exists for today, replace? (Y/n)"
 ERRORMSG4 = "Exiting..."
+ERRORMSG5 = "Input Error, Database has not been touched"
 FILENAME = "./data.dat"
 GRAPHTITLE = 'Daily and Weekly Weight Progression'
 GRAPHX = 'Date'
@@ -49,12 +49,17 @@ def addWeight():
     # formating for locale - probably should check how to generalize this
     commaToPoint = re.compile(r",")
     weight = commaToPoint.sub(".", weight)
+    try:
+        float(weight)
+    except ValueError:
+        print(ERRORMSG5)
+        print(ERRORMSG4)
+        exit(0)
     if replacemode:
         # save the entire file in memory
         file = open(FILENAME, "r")
         content = file.readlines()
         file.close()
-        print(content)
         # change last entry
         content[-1] = f"{today} {weight}"
         # overwrite entire file
@@ -125,7 +130,6 @@ def display():
         fig.show()
     except ValueError:
         print(ERRORMSG2)
-        traceback.print_exc()
 
 
 def main():
