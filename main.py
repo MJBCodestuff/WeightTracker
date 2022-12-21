@@ -98,13 +98,13 @@ def display():
         fig.add_trace(go.Scatter(x=dailyDate, y=dailyWeight,
                                  name="Daily",
                                  mode='lines+markers',
-                                 line = dict(color='firebrick', width=1),
-                                 connectgaps=True ))
+                                 line=dict(color='firebrick', width=1),
+                                 connectgaps=True))
         fig.add_trace(go.Scatter(x=weeklyDate, y=weeklyWeight,
                                  name="Weekly",
                                  mode='lines+markers',
-                                 line = dict(color='royalblue', width=2),
-                                 connectgaps=True ))
+                                 line=dict(color='royalblue', width=2),
+                                 connectgaps=True))
         fig.update_layout(title='Daily and Weekly Weight Progression',
                           xaxis_title='Date',
                           yaxis_title='Weight(kg)')
