@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import traceback
+import datetime
 from datetime import date
 import plotly.graph_objects as go
 
@@ -113,6 +114,14 @@ def display():
         fig.update_layout(title=GRAPHTITLE,
                           xaxis_title=GRAPHX,
                           yaxis_title=GRAPHY)
+        # add minor ticks
+        fig.update_yaxes(minor=dict(ticklen=4, tickcolor="black", showgrid=True),
+                         minor_ticks="inside")
+        # add minor ticks, set range to +-1 day, label only mondays
+        fig.update_xaxes(minor=dict(ticklen=4, tickcolor="black", showgrid=True, tickmode="linear"),
+                         range=(dailyDate[0] - datetime.timedelta(days=1), dailyDate[-1] + datetime.timedelta(days=1)),
+                         tickvals=weeklyDate,
+                         minor_ticks="inside")
         fig.show()
     except ValueError:
         print(ERRORMSG2)
