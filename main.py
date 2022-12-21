@@ -1,8 +1,10 @@
 import os
 import re
 import sys
+import traceback
 from datetime import date
 import plotly.express as px
+import plotly.graph_objects as go
 
 # text
 ERRORMSG1 = "Add (a)dd, (d)aily or (w)eekly as argument"
@@ -62,12 +64,10 @@ def addWeight():
         file.write(f"\n{today} {weight}")
         file.close()
     # display with new data
-    display("d")
-    if date.today().weekday() == 0:
-        display("w")
+    display()
 
 
-def display(choice="d"):
+def display():
     # open file, initialize lists
     dataText = open(FILENAME).read()
     dailyDate = []
@@ -93,19 +93,25 @@ def display(choice="d"):
             weeklyDate.append(day)
             weeklyWeight.append(weight)
     # display daily weight graph
-    if choice == "d":
-        try:
-            fig = px.line(x=dailyDate, y=dailyWeight, labels={'x': 'Datum', 'y': 'Gewicht'}, markers=True)
-            fig.show()
-        except ValueError:
-            print(ERRORMSG2)
-    # display weekly weight graph
-    if choice == "w":
-        try:
-            fig2 = px.line(x=weeklyDate, y=weeklyWeight, labels={'x': 'Datum', 'y': 'Gewicht'}, markers=True)
-            fig2.show()
-        except ValueError:
-            print(ERRORMSG2)
+    try:
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=dailyDate, y=dailyWeight,
+                                 name="Daily",
+                                 mode='lines+markers',
+                                 line = dict(color='firebrick', width=1),
+                                 connectgaps=True ))
+        fig.add_trace(go.Scatter(x=weeklyDate, y=weeklyWeight,
+                                 name="Weekly",
+                                 mode='lines+markers',
+                                 line = dict(color='royalblue', width=2),
+                                 connectgaps=True ))
+        fig.update_layout(title='Daily and Weekly Weight Progression',
+                          xaxis_title='Date',
+                          yaxis_title='Weight(kg)')
+        fig.show()
+    except ValueError:
+        print(ERRORMSG2)
+        traceback.print_exc()
 
 
 def main():
@@ -127,8 +133,8 @@ def main():
     # choose operation
     if choice == "a":
         addWeight()
-    elif choice == "d" or choice == "w":
-        display(choice)
+    elif choice == "d":
+        display()
     else:
         print(ERRORMSG1)
 
