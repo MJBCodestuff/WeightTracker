@@ -111,7 +111,8 @@ def display(choice="d"):
 def main():
     # if argument is missing set to trash
     if len(sys.argv) < 2:
-        sys.argv.append("x")
+        print(ERRORMSG1)
+        exit(0)
     choice = sys.argv[1]
     # set working directory to main.py path
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
