@@ -17,7 +17,7 @@ GRAPHX = 'Date'
 GRAPHY = 'Weight(kg)'
 
 
-def addWeight():
+def add_weight():
     # date formating because it isn't saved as dd.mm.yy
     # instead of ISO 8601 to work with my existing data
     # and make the file more comfortable to read
@@ -47,8 +47,8 @@ def addWeight():
 
     weight = input("Weight: ")
     # formating for locale - probably should check how to generalize this
-    commaToPoint = re.compile(r",")
-    weight = commaToPoint.sub(".", weight)
+    comma_to_point = re.compile(r",")
+    weight = comma_to_point.sub(".", weight)
     try:
         float(weight)
     except ValueError:
@@ -77,15 +77,15 @@ def addWeight():
 
 def display():
     # open file, initialize lists
-    dataText = open(FILENAME).read()
-    dailyDate = []
-    dailyWeight = []
-    weeklyDate = []
-    weeklyWeight = []
+    data_text = open(FILENAME).read()
+    daily_date = []
+    daily_weight = []
+    weekly_date = []
+    weekly_weight = []
     # more date formating ...
     datereg = re.compile(r"(\d\d).(\d\d).(\d\d)")
-    dataText = datereg.sub(r"20\3-\2-\1", dataText)
-    data = dataText.split("\n")
+    data_text = datereg.sub(r"20\3-\2-\1", data_text)
+    data = data_text.split("\n")
     for i, line in enumerate(data):
         # skip header
         if i == 0:
@@ -95,22 +95,22 @@ def display():
         day = date.fromisoformat(day)
         weight = float(weight)
         # generate 2x2 lists
-        dailyDate.append(day)
-        dailyWeight.append(weight)
+        daily_date.append(day)
+        daily_weight.append(weight)
         if day.weekday() == 0:
-            weeklyDate.append(day)
-            weeklyWeight.append(weight)
+            weekly_date.append(day)
+            weekly_weight.append(weight)
     # display daily weight graph
     try:
         fig = go.Figure()
         # daily curve
-        fig.add_trace(go.Scatter(x=dailyDate, y=dailyWeight,
+        fig.add_trace(go.Scatter(x=daily_date, y=daily_weight,
                                  name="Daily",
                                  mode='lines+markers',
                                  line=dict(color='firebrick', width=1),
                                  connectgaps=True))
         # weekly curve
-        fig.add_trace(go.Scatter(x=weeklyDate, y=weeklyWeight,
+        fig.add_trace(go.Scatter(x=weekly_date, y=weekly_weight,
                                  name="Weekly",
                                  mode='lines+markers',
                                  line=dict(color='royalblue', width=2),
@@ -124,8 +124,9 @@ def display():
                          minor_ticks="inside")
         # add minor ticks, set range to +-1 day, label only mondays
         fig.update_xaxes(minor=dict(ticklen=4, tickcolor="black", showgrid=True, tickmode="linear"),
-                         range=(dailyDate[0] - datetime.timedelta(days=1), dailyDate[-1] + datetime.timedelta(days=1)),
-                         tickvals=weeklyDate,
+                         range=(daily_date[0] - datetime.timedelta(days=1),
+                                daily_date[-1] + datetime.timedelta(days=1)),
+                         tickvals=weekly_date,
                          minor_ticks="inside")
         fig.show()
     except ValueError:
@@ -150,7 +151,7 @@ def main():
         file.close()
     # choose operation
     if choice == "a":
-        addWeight()
+        add_weight()
     elif choice == "d":
         display()
     else:
