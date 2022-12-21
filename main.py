@@ -3,7 +3,6 @@ import re
 import sys
 import traceback
 from datetime import date
-import plotly.express as px
 import plotly.graph_objects as go
 
 # text
@@ -12,6 +11,9 @@ ERRORMSG2 = "No data available"
 ERRORMSG3 = "Entry already exists for today, replace? (Y/n)"
 ERRORMSG4 = "Exiting..."
 FILENAME = "./data.dat"
+GRAPHTITLE = 'Daily and Weekly Weight Progression'
+GRAPHX = 'Date'
+GRAPHY = 'Weight(kg)'
 
 
 def addWeight():
@@ -95,19 +97,22 @@ def display():
     # display daily weight graph
     try:
         fig = go.Figure()
+        # daily curve
         fig.add_trace(go.Scatter(x=dailyDate, y=dailyWeight,
                                  name="Daily",
                                  mode='lines+markers',
                                  line=dict(color='firebrick', width=1),
                                  connectgaps=True))
+        # weekly curve
         fig.add_trace(go.Scatter(x=weeklyDate, y=weeklyWeight,
                                  name="Weekly",
                                  mode='lines+markers',
                                  line=dict(color='royalblue', width=2),
                                  connectgaps=True))
-        fig.update_layout(title='Daily and Weekly Weight Progression',
-                          xaxis_title='Date',
-                          yaxis_title='Weight(kg)')
+        # layout
+        fig.update_layout(title=GRAPHTITLE,
+                          xaxis_title=GRAPHX,
+                          yaxis_title=GRAPHY)
         fig.show()
     except ValueError:
         print(ERRORMSG2)
