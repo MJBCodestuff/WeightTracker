@@ -6,7 +6,7 @@ from datetime import date
 import plotly.graph_objects as go
 
 # text
-ERRORMSG1 = "Add (a)dd, (d)aily or (w)eekly as argument"
+ERRORMSG1 = "Add (a)dd, (d)isplay or (t)able as argument"
 ERRORMSG2 = "No data available"
 ERRORMSG3 = "Entry already exists for today, replace? (Y/n)"
 ERRORMSG4 = "Exiting..."
@@ -15,6 +15,7 @@ FILENAME = "./data.dat"
 GRAPHTITLE = 'Daily and Weekly Weight Progression'
 GRAPHX = 'Date'
 GRAPHY = 'Weight(kg)'
+WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
 
 def add_weight():
@@ -75,13 +76,11 @@ def add_weight():
     display()
 
 
-def display():
+def read_data():
     # open file, initialize lists
     data_text = open(FILENAME).read()
     daily_date = []
     daily_weight = []
-    weekly_date = []
-    weekly_weight = []
     # more date formating ...
     datereg = re.compile(r"(\d\d).(\d\d).(\d\d)")
     data_text = datereg.sub(r"20\3-\2-\1", data_text)
@@ -94,12 +93,21 @@ def display():
         # fooooormating
         day = date.fromisoformat(day)
         weight = float(weight)
-        # generate 2x2 lists
+        # generate 2 lists
         daily_date.append(day)
         daily_weight.append(weight)
+    return daily_date, daily_weight
+
+
+def display():
+    # get monday values for a fixed weekly comparison
+    weekly_date = []
+    weekly_weight = []
+    daily_date, daily_weight, = read_data()
+    for i, day in enumerate(daily_date):
         if day.weekday() == 0:
             weekly_date.append(day)
-            weekly_weight.append(weight)
+            weekly_weight.append(daily_weight[i])
     # display daily weight graph
     try:
         fig = go.Figure()
@@ -133,6 +141,37 @@ def display():
         print(ERRORMSG2)
 
 
+def overview_table():
+    daily_date, daily_weight = read_data()
+    collection = [[] for x in range(7)]
+    weightloss_by_weekday = []
+    # split every delta up into the corresponding weekday
+    for i in range(1, len(daily_date), 1):
+        collection[daily_date[i].weekday()].append(daily_weight[i] - daily_weight[i - 1])
+    # get the average for each weekday
+    for i, day in enumerate(collection):
+        weightloss_by_weekday.append(round(sum(day) / len(day) * 1000, 2))
+        # formatting
+        if weightloss_by_weekday[i] >= 0:
+            weightloss_by_weekday[i] = "+" + '{:06.2f}'.format(weightloss_by_weekday[i])
+        else:
+            weightloss_by_weekday[i] = '{:07.2f}'.format(weightloss_by_weekday[i])
+    # calculate lost weight and averages
+    loss = (daily_weight[-1] - daily_weight[0]) * 1000
+    daily_avg = loss / len(daily_weight)
+    weekly_avg = daily_avg * 7
+    # format and print weekday stats
+    for i, day in enumerate(weightloss_by_weekday):
+        part1 = f"  {WEEKDAYS[i]} "
+        for j in range(len(part1), 16):
+            part1 += " "
+        print(f"{part1} {day}g")
+    # format and print other averages
+    print(f"  Daily Average  {'{:.7s}'.format('{:07.2f}'.format(daily_avg))}g")
+    print(f"  Weekly Average {'{:.7s}'.format('{:07.2f}'.format(weekly_avg))}g")
+    print(f"Weightloss Total {'{:.7s}'.format('{:07.2f}'.format(loss))}g")
+
+
 def main():
     # if argument is missing set to trash
     if len(sys.argv) < 2:
@@ -154,6 +193,8 @@ def main():
         add_weight()
     elif choice == "d":
         display()
+    elif choice == "t":
+        overview_table()
     else:
         print(ERRORMSG1)
 
