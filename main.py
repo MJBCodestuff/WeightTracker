@@ -115,13 +115,19 @@ def display():
         fig.add_trace(go.Scatter(x=daily_date, y=daily_weight,
                                  name="Daily",
                                  mode='lines+markers',
-                                 line=dict(color='firebrick', width=1),
+                                 line=dict(color='RGB(0,206,209)', width=1),
                                  connectgaps=True))
         # weekly curve
         fig.add_trace(go.Scatter(x=weekly_date, y=weekly_weight,
                                  name="Weekly",
-                                 mode='lines+markers',
-                                 line=dict(color='royalblue', width=2),
+                                 mode='lines',
+                                 line=dict(color='RGB(238,48,167)', width=2),
+                                 connectgaps=True))
+        # line to show average developement from start to today
+        fig.add_trace(go.Scatter(x=[daily_date[0], daily_date[-1]], y=[daily_weight[0], daily_weight[-1]],
+                                 name="Average",
+                                 mode="lines",
+                                 line=dict(color="RGB(110,110,110)", width=1),
                                  connectgaps=True))
         # layout
         fig.update_layout(title=GRAPHTITLE,
