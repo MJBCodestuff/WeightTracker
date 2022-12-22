@@ -120,7 +120,7 @@ def display():
         # weekly curve
         fig.add_trace(go.Scatter(x=weekly_date, y=weekly_weight,
                                  name="Weekly",
-                                 mode='lines',
+                                 mode='lines+markers',
                                  line=dict(color='RGB(238,48,167)', width=2),
                                  connectgaps=True))
         # line to show average developement from start to today
