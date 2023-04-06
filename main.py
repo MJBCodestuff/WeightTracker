@@ -1,9 +1,11 @@
+from decimal import ROUND_CEILING
 import os
 import re
 import sys
 import datetime
 from datetime import date
 import plotly.graph_objects as go
+import math
 
 # text
 ERRORMSG1 = "Add (a)dd, (d)isplay or (t)able as argument"
@@ -123,8 +125,12 @@ def display():
                                  mode='lines+markers',
                                  line=dict(color='RGB(238,48,167)', width=2),
                                  connectgaps=True))
-        # line to show average developement from start to today
-        fig.add_trace(go.Scatter(x=[daily_date[0], daily_date[-1]], y=[daily_weight[0], daily_weight[-1]],
+        # line to show average developement from start to the average of the last 7 measurements
+        current_average = 0
+        for i in range(0, 7):
+            current_average += daily_weight[-(i+1)]
+        current_average /= 7
+        fig.add_trace(go.Scatter(x=[daily_date[0], daily_date[-4]], y=[daily_weight[0], current_average],
                                  name="Average",
                                  mode="lines",
                                  line=dict(color="RGB(110,110,110)", width=1),
@@ -163,9 +169,25 @@ def overview_table():
         else:
             weightloss_by_weekday[i] = '{:07.2f}'.format(weightloss_by_weekday[i])
     # calculate lost weight and averages
-    loss = (daily_weight[-1] - daily_weight[0]) * 1000
-    daily_avg = loss / len(daily_weight)
-    weekly_avg = daily_avg * 7
+    loss = (daily_weight[-1] - daily_weight[0]) * 1000 # in g
+    daily_avg = loss / len(daily_weight)               # in g
+    weekly_avg = daily_avg * 7                         # in g
+    projected_duration = (daily_weight[-1] - 90) * 1000 / daily_avg * (-1)
+    projected_duration = math.ceil(projected_duration)
+    projected_weeks = math.ceil(projected_duration / 7)
+    projected_enddate = daily_date[-1] + datetime.timedelta(days=projected_duration)
+    current_average = 0
+    for i in range(0, 7):
+        current_average += daily_weight[-(i+1)]
+    current_average /= 7
+    using_avg_loss = (current_average - daily_weight[0]) * 1000 # in g
+    using_avg_daily_avg = using_avg_loss / len(daily_weight)               # in g
+    using_avg_weekly_avg = using_avg_daily_avg * 7                         # in g
+    using_avg_projected_duration = (current_average - 90) * 1000 / using_avg_daily_avg * (-1)
+    using_avg_projected_duration = math.ceil(using_avg_projected_duration)
+    using_avg_projected_weeks = math.ceil(using_avg_projected_duration / 7)
+    using_avg_projected_enddate = daily_date[-1] + datetime.timedelta(days=using_avg_projected_duration)
+    
     # format and print weekday stats
     for i, day in enumerate(weightloss_by_weekday):
         part1 = f"  {WEEKDAYS[i]} "
@@ -173,10 +195,23 @@ def overview_table():
             part1 += " "
         print(f"{part1} {day}g")
     # format and print other averages
+    print()
     print(f"  Daily Average  {'{:.7s}'.format('{:07.2f}'.format(daily_avg))}g")
     print(f"  Weekly Average {'{:.7s}'.format('{:07.2f}'.format(weekly_avg))}g")
     print(f"Weightloss Total {'{:.7s}'.format('{:07.2f}'.format(loss))}g")
-
+    print()
+    print(f"Current weight averaged over the last 7 measurements {'{:.7s}'.format('{:06.2f}'.format(current_average))}g")
+    print(f"Daily Average loss using average weight             {'{:.7s}'.format('{:07.2f}'.format(using_avg_daily_avg))}g")
+    print(f"Weekly Average loss using average weight            {'{:.7s}'.format('{:07.2f}'.format(using_avg_weekly_avg))}g")
+    print(f"Weightloss Total using average weight               {'{:.7s}'.format('{:07.2f}'.format(using_avg_loss))}g")
+    print()
+    print(f"Remaining Days until 90kg at current speed          {'{:.7s}'.format('{:03.0f}'.format(projected_duration))} days")
+    print(f"Remaining Weeks until 90kg at current speed         {projected_weeks}")
+    print(f"Projected Enddate                                   {projected_enddate}")
+    print()
+    print(f"Remaining Days until 90kg at current speed using average weight   {'{:.7s}'.format('{:03.0f}'.format(using_avg_projected_duration))} days")
+    print(f"Remaining Weeks until 90kg at current speed using average weight  {using_avg_projected_weeks}")
+    print(f"Projected Enddate using average weight                            {using_avg_projected_enddate}")
 
 def main():
     # if argument is missing set to trash
